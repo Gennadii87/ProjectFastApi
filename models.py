@@ -12,7 +12,6 @@ class Menu(Base):
     title = Column(String, index=True)
     description = Column(String)
     submenus = relationship("SubMenu", back_populates="menu", cascade="all, delete-orphan")
-    dishes = relationship("Dish", back_populates="menu", cascade="all, delete-orphan")
 
 
 class SubMenu(Base):
@@ -33,8 +32,5 @@ class Dish(Base):
     title = Column(String, index=True)
     description = Column(String)
     price = Column(Float)
-    menu_id = Column(UUID(as_uuid=True), ForeignKey("menus.id"), index=True, nullable=False)
     submenu_id = Column(UUID(as_uuid=True), ForeignKey("submenus.id"), index=True, nullable=False)
-
-    menu = relationship("Menu", back_populates="dishes")
     submenu = relationship("SubMenu", back_populates="dishes")
