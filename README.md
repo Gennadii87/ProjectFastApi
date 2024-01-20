@@ -6,6 +6,7 @@
 
 НЕ ЗАБУДТЕ СОЗДАТЬ ПОЛЬЗОВАТЕЛЯ В БАЗЕ ДАННЫХ PostgresSQL и задать пароль
 Далее в файле database.py установите свои параметры подключения к вашей БД (DATABASE_URL = "postgresql://postgres:superuser@localhost:5432/my_database" по умолчанию имя пользователя в PostgresSQL -  postgres, а superuser это ваш пароль когда вы устанвливали базу данных, рекомендуется для удобства использовать pgAdmin)
+Примечание: в моделях базы используеться поле id с типом uudi, необходимо выполнить команду в PostgressSQL - CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 ЗАПУСТИТЕ ПРОЕКТ КОМАНДОЙ: uvicorn main:app --reload 
 При первом запуске автоматически создатся база данных (если правильно уазали параметры DATABASE_URL = "postgresql://postgres:superuser@localhost:5432/my_database" )
