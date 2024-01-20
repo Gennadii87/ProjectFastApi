@@ -13,16 +13,10 @@ router = APIRouter()
 def read_all_dishes(menu_id: str, submenu_id: str, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     dishes = (db.query(DBDish).filter(DBDish.menu_id == menu_id, DBDish.submenu_id == submenu_id).offset(skip)
               .limit(limit).all())
-
-    dishes_with_counts = []
     for dish in dishes:
-        dishes_with_counts.append(Dish(
-            id=dish.id,
-            title=dish.title,
-            description=dish.description,
-            price="{:.2f}".format(dish.price)
-        ))
-    return dishes_with_counts
+        dish.price = f"{dish.price:.2f}"
+
+    return dishes
 
 
 @router.get("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}", response_model=Dish)
@@ -31,7 +25,7 @@ def read_dish(menu_id: str, submenu_id: str, dish_id: str, db: Session = Depends
             .first())
     if dish is None:
         raise HTTPException(status_code=404, detail="dish not found")
-    dish.price = "{:.2f}".format(dish.price)
+    dish.price = f"{dish.price:.2f}"
     return dish
 
 
