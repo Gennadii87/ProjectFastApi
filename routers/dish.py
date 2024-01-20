@@ -10,8 +10,8 @@ router = APIRouter()
 
 
 @router.get("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/", response_model=List[Dish])
-def read_all_dishes(menu_id: str, submenu_id: str, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    dishes = (db.query(DBDish).filter(DBDish.menu_id == menu_id, DBDish.submenu_id == submenu_id).offset(skip)
+def read_all_dishes(submenu_id: str, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    dishes = (db.query(DBDish).filter(DBDish.submenu_id == submenu_id).offset(skip)
               .limit(limit).all())
     for dish in dishes:
         dish.price = f"{dish.price:.2f}"
@@ -20,8 +20,8 @@ def read_all_dishes(menu_id: str, submenu_id: str, skip: int = 0, limit: int = 1
 
 
 @router.get("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}", response_model=Dish)
-def read_dish(menu_id: str, submenu_id: str, dish_id: str, db: Session = Depends(get_db)):
-    dish = (db.query(DBDish).filter(DBDish.id == dish_id, DBDish.menu_id == menu_id, DBDish.submenu_id == submenu_id)
+def read_dish(submenu_id: str, dish_id: str, db: Session = Depends(get_db)):
+    dish = (db.query(DBDish).filter(DBDish.id == dish_id, DBDish.submenu_id == submenu_id)
             .first())
     if dish is None:
         raise HTTPException(status_code=404, detail="dish not found")
@@ -31,8 +31,8 @@ def read_dish(menu_id: str, submenu_id: str, dish_id: str, db: Session = Depends
 
 @router.post("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/", response_model=Dish, status_code=status
              .HTTP_201_CREATED)
-def create_dish(menu_id: str, submenu_id: str, dish: DishCreate, db: Session = Depends(get_db)):
-    db_dish = DBDish(**dish.dict(), menu_id=menu_id, submenu_id=submenu_id)
+def create_dish(submenu_id: str, dish: DishCreate, db: Session = Depends(get_db)):
+    db_dish = DBDish(**dish.dict(), submenu_id=submenu_id)
     db.add(db_dish)
     db.commit()
     db.refresh(db_dish)
@@ -41,8 +41,8 @@ def create_dish(menu_id: str, submenu_id: str, dish: DishCreate, db: Session = D
 
 
 @router.patch("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}", response_model=Dish)
-def update_dish(menu_id: str, submenu_id: str, dish_id: str, dish: DishCreate, db: Session = Depends(get_db)):
-    db_dish = (db.query(DBDish).filter(DBDish.id == dish_id, DBDish.menu_id == menu_id, DBDish.submenu_id == submenu_id)
+def update_dish(submenu_id: str, dish_id: str, dish: DishCreate, db: Session = Depends(get_db)):
+    db_dish = (db.query(DBDish).filter(DBDish.id == dish_id, DBDish.submenu_id == submenu_id)
                .first())
     if db_dish is None:
         raise HTTPException(status_code=404, detail="dish not found")
@@ -56,8 +56,8 @@ def update_dish(menu_id: str, submenu_id: str, dish_id: str, dish: DishCreate, d
 
 
 @router.delete("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}")
-def delete_dish(menu_id: str, submenu_id: str, dish_id: str, db: Session = Depends(get_db)):
-    dish = (db.query(DBDish).filter(DBDish.id == dish_id, DBDish.menu_id == menu_id, DBDish.submenu_id == submenu_id)
+def delete_dish(submenu_id: str, dish_id: str, db: Session = Depends(get_db)):
+    dish = (db.query(DBDish).filter(DBDish.id == dish_id, DBDish.submenu_id == submenu_id)
             .first())
     if dish is None:
         raise HTTPException(status_code=404, detail="Dish not found")
