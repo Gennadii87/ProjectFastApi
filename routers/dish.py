@@ -60,7 +60,7 @@ def delete_dish(submenu_id: str, dish_id: str, db: Session = Depends(get_db)):
     dish = (db.query(DBDish).filter(DBDish.id == dish_id, DBDish.submenu_id == submenu_id)
             .first())
     if dish is None:
-        raise HTTPException(status_code=404, detail="Dish not found")
+        raise HTTPException(status_code=404, detail="dish not found")
     db.delete(dish)
     db.commit()
     return {"message": "Dish deleted successfully"}

@@ -65,7 +65,7 @@ def create_submenu(menu_id: str, submenu: SubMenuCreate, db: Session = Depends(g
 def update_submenu(menu_id: str, submenu_id: str, submenu: SubMenuCreate, db: Session = Depends(get_db)):
     db_submenu = db.query(DBSubMenu).filter(DBSubMenu.id == submenu_id, DBSubMenu.menu_id == menu_id).first()
     if db_submenu is None:
-        raise HTTPException(status_code=404, detail="SubMenu not found")
+        raise HTTPException(status_code=404, detail="subMenu not found")
     for key, value in submenu.dict().items():
         setattr(db_submenu, key, value)
     db.commit()
@@ -77,7 +77,7 @@ def update_submenu(menu_id: str, submenu_id: str, submenu: SubMenuCreate, db: Se
 def delete_submenu(menu_id: str, submenu_id: str, db: Session = Depends(get_db)):
     submenu = db.query(DBSubMenu).filter(DBSubMenu.id == submenu_id, DBSubMenu.menu_id == menu_id).first()
     if submenu is None:
-        raise HTTPException(status_code=404, detail="SubMenu not found")
+        raise HTTPException(status_code=404, detail="subMenu not found")
     db.delete(submenu)
     db.commit()
     return {"message": "SubMenu deleted successfully"}
