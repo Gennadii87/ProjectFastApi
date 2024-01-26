@@ -5,11 +5,12 @@ from database.schemas import Dish, DishCreate
 from database.database import get_db
 from typing import List
 from fastapi import status
+from config import prefixes, DISHES_LINK, DISH_LINK
 
-router = APIRouter()
+router = APIRouter(prefix=prefixes)
 
 
-@router.get("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/", response_model=List[Dish])
+@router.get(DISHES_LINK, response_model=List[Dish])
 def read_all_dishes(submenu_id: str, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     dishes = (db.query(DBDish).filter(DBDish.submenu_id == submenu_id).offset(skip)
               .limit(limit).all())
@@ -19,7 +20,7 @@ def read_all_dishes(submenu_id: str, skip: int = 0, limit: int = 10, db: Session
     return dishes
 
 
-@router.get("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}", response_model=Dish)
+@router.get(DISH_LINK, response_model=Dish)
 def read_dish(submenu_id: str, dish_id: str, db: Session = Depends(get_db)):
     dish = (db.query(DBDish).filter(DBDish.id == dish_id, DBDish.submenu_id == submenu_id)
             .first())
@@ -29,7 +30,7 @@ def read_dish(submenu_id: str, dish_id: str, db: Session = Depends(get_db)):
     return dish
 
 
-@router.post("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/", response_model=Dish, status_code=status
+@router.post(DISHES_LINK, response_model=Dish, status_code=status
              .HTTP_201_CREATED)
 def create_dish(submenu_id: str, dish: DishCreate, db: Session = Depends(get_db)):
     db_dish = DBDish(**dish.dict(), submenu_id=submenu_id)
@@ -40,7 +41,7 @@ def create_dish(submenu_id: str, dish: DishCreate, db: Session = Depends(get_db)
     return db_dish
 
 
-@router.patch("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}", response_model=Dish)
+@router.patch(DISH_LINK, response_model=Dish)
 def update_dish(submenu_id: str, dish_id: str, dish: DishCreate, db: Session = Depends(get_db)):
     db_dish = (db.query(DBDish).filter(DBDish.id == dish_id, DBDish.submenu_id == submenu_id)
                .first())
@@ -55,7 +56,7 @@ def update_dish(submenu_id: str, dish_id: str, dish: DishCreate, db: Session = D
     return db_dish
 
 
-@router.delete("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}")
+@router.delete(DISH_LINK)
 def delete_dish(submenu_id: str, dish_id: str, db: Session = Depends(get_db)):
     dish = (db.query(DBDish).filter(DBDish.id == dish_id, DBDish.submenu_id == submenu_id)
             .first())

@@ -5,11 +5,12 @@ from database.schemas import SubMenu, SubMenuCreate
 from database.database import get_db
 from typing import List
 from fastapi import status
+from config import prefixes, SUBMENUS_LINK, SUBMENU_LINK
 
-router = APIRouter()
+router = APIRouter(prefix=prefixes)
 
 
-@router.get("/api/v1/menus/{menu_id}/submenus/", response_model=List[SubMenu])
+@router.get(SUBMENUS_LINK, response_model=List[SubMenu])
 def read_all_submenus(menu_id: str, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     submenus = db.query(DBSubMenu).filter(DBSubMenu.menu_id == menu_id).offset(skip).limit(limit).all()
 
@@ -29,7 +30,7 @@ def read_all_submenus(menu_id: str, skip: int = 0, limit: int = 10, db: Session 
     return submenus_with_counts
 
 
-@router.get("/api/v1/menus/{menu_id}/submenus/{submenu_id}", response_model=SubMenu)
+@router.get(SUBMENU_LINK, response_model=SubMenu)
 def read_submenu(menu_id: str, submenu_id: str, db: Session = Depends(get_db)):
     submenu = db.query(DBSubMenu).filter(DBSubMenu.id == submenu_id, DBSubMenu.menu_id == menu_id).first()
     if submenu is None:
@@ -49,7 +50,7 @@ def read_submenu(menu_id: str, submenu_id: str, db: Session = Depends(get_db)):
     return submenu_with_counts
 
 
-@router.post("/api/v1/menus/{menu_id}/submenus/", response_model=SubMenu, status_code=status.HTTP_201_CREATED)
+@router.post(SUBMENUS_LINK, response_model=SubMenu, status_code=status.HTTP_201_CREATED)
 def create_submenu(menu_id: str, submenu: SubMenuCreate, db: Session = Depends(get_db)):
     submenu_data = submenu.dict()
     submenu_data["menu_id"] = menu_id
@@ -61,7 +62,7 @@ def create_submenu(menu_id: str, submenu: SubMenuCreate, db: Session = Depends(g
     return db_submenu
 
 
-@router.patch("/api/v1/menus/{menu_id}/submenus/{submenu_id}", response_model=SubMenu)
+@router.patch(SUBMENU_LINK, response_model=SubMenu)
 def update_submenu(menu_id: str, submenu_id: str, submenu: SubMenuCreate, db: Session = Depends(get_db)):
     db_submenu = db.query(DBSubMenu).filter(DBSubMenu.id == submenu_id, DBSubMenu.menu_id == menu_id).first()
     if db_submenu is None:
@@ -73,7 +74,7 @@ def update_submenu(menu_id: str, submenu_id: str, submenu: SubMenuCreate, db: Se
     return db_submenu
 
 
-@router.delete("/api/v1/menus/{menu_id}/submenus/{submenu_id}")
+@router.delete(SUBMENU_LINK)
 def delete_submenu(menu_id: str, submenu_id: str, db: Session = Depends(get_db)):
     submenu = db.query(DBSubMenu).filter(DBSubMenu.id == submenu_id, DBSubMenu.menu_id == menu_id).first()
     if submenu is None:
