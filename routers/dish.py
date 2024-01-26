@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from models import Dish as DBDish
-from schemas import Dish, DishCreate
-from database import get_db
+from database.models import Dish as DBDish
+from database.schemas import Dish, DishCreate
+from database.database import get_db
 from typing import List
 from fastapi import status
 

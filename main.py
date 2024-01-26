@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from database import engine, Base
+from database.database import engine, Base
 from routers import menu, submenu, dish
 
 app = FastAPI()

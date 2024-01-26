@@ -2,7 +2,7 @@ import uuid
 from sqlalchemy import Column, String, Float, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from database import Base
+from database.database import Base
 
 
 class Menu(Base):
