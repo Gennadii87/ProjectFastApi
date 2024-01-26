@@ -5,6 +5,7 @@ from schemas import Menu, MenuCreate
 from database import get_db
 from typing import List
 from fastapi import status
+from sqlalchemy import func
 
 
 router = APIRouter()
@@ -12,13 +13,13 @@ router = APIRouter()
 
 @router.get("/api/v1/menus/", response_model=List[Menu])
 def read_all_menus(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    menus = db.query(DBMenu).offset(skip).limit(limit).all()
-
-    menus_with_counts = []
-    for menu in menus:
-        submenus_count = db.query(DBSubMenu).filter(DBSubMenu.menu_id == menu.id).count()
-        dishes_count = db.query(DBDish).join(DBSubMenu).filter(DBSubMenu.menu_id == menu.id).count()
-
+    menus_with_counts = db.query(
+        DBMenu,
+        func.count(DBSubMenu.id.distinct()).label('submenus_count'),
+        func.count(DBDish.id.distinct()).label('dishes_count')
+    ).select_from(DBMenu).outerjoin(DBSubMenu).outerjoin(DBDish).group_by(DBMenu.id).offset(skip).limit(limit).all()
+    result_menus = []
+    for menu, submenus_count, dishes_count in menus_with_counts:
         menu_with_counts = Menu(
             id=menu.id,
             title=menu.title,
@@ -26,21 +27,26 @@ def read_all_menus(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)
             submenus_count=submenus_count,
             dishes_count=dishes_count
         )
+        result_menus.append(menu_with_counts)
 
-        menus_with_counts.append(menu_with_counts)
-
-    return menus_with_counts
+    return result_menus
 
 
 @router.get("/api/v1/menus/{menu_id}", response_model=Menu)
 def read_menu(menu_id: str, db: Session = Depends(get_db)):
-    menu = db.query(DBMenu).filter(DBMenu.id == menu_id).first()
-    if menu is None:
+    menu_data = db.query(
+        DBMenu,
+        func.count(DBSubMenu.id.distinct()).label('submenus_count'),
+        func.count(DBDish.id.distinct()).label('dishes_count')
+    ).outerjoin(DBSubMenu, DBMenu.id == DBSubMenu.menu_id)\
+     .outerjoin(DBDish, DBSubMenu.id == DBDish.submenu_id)\
+     .filter(DBMenu.id == menu_id)\
+     .group_by(DBMenu.id).first()
+
+    if not menu_data:
         raise HTTPException(status_code=404, detail="menu not found")
 
-    submenus_count = db.query(DBSubMenu).filter(DBSubMenu.menu_id == menu.id).count()
-    dishes_count = db.query(DBDish).join(DBSubMenu).filter(DBSubMenu.menu_id == menu.id).count()
-
+    menu, submenus_count, dishes_count = menu_data
     menu_with_counts = Menu(
         id=menu.id,
         title=menu.title,
